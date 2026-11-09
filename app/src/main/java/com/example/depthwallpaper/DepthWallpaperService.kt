@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +15,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.max
 
 class DepthWallpaperService : WallpaperService() {
 
@@ -92,6 +93,25 @@ class DepthWallpaperService : WallpaperService() {
             }
         }
 
+        // Centers and crops the image to fill the screen without stretching/distortion
+        private fun drawCenterCrop(canvas: Canvas, bitmap: Bitmap, viewWidth: Int, viewHeight: Int) {
+            val bitmapWidth = bitmap.width.toFloat()
+            val bitmapHeight = bitmap.height.toFloat()
+
+            val scale = max(viewWidth / bitmapWidth, viewHeight / bitmapHeight)
+            val scaledWidth = scale * bitmapWidth
+            val scaledHeight = scale * bitmapHeight
+
+            val dx = (viewWidth - scaledWidth) / 2f
+            val dy = (viewHeight - scaledHeight) / 2f
+
+            val matrix = Matrix().apply {
+                postScale(scale, scale)
+                postTranslate(dx, dy)
+            }
+            canvas.drawBitmap(bitmap, matrix, null)
+        }
+
         private fun drawFrame() {
             val holder = surfaceHolder
             var canvas: Canvas? = null
@@ -100,12 +120,13 @@ class DepthWallpaperService : WallpaperService() {
                 if (canvas != null) {
                     val width = canvas.width
                     val height = canvas.height
-                    val destRect = Rect(0, 0, width, height)
 
+                    // 1. Draw Background (Proportionally Scaled)
                     bgBitmap?.let {
-                        canvas.drawBitmap(it, null, destRect, null)
+                        drawCenterCrop(canvas, it, width, height)
                     } ?: canvas.drawColor(Color.DKGRAY)
 
+                    // 2. Draw Sandwiched Time & Date
                     timePaint.color = settings.timeColor
                     timePaint.textSize = settings.timeSize
                     timePaint.typeface = customTypeface
@@ -121,8 +142,9 @@ class DepthWallpaperService : WallpaperService() {
                     canvas.drawText(dateStr, centerX, dateY, datePaint)
                     canvas.drawText(timeStr, centerX, timeY, timePaint)
 
+                    // 3. Draw Foreground Cutout (Proportionally Scaled with the exact same matrix)
                     fgBitmap?.let {
-                        canvas.drawBitmap(it, null, destRect, null)
+                        drawCenterCrop(canvas, it, width, height)
                     }
                 }
             } finally {
