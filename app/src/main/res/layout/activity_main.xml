@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Depth Wallpaper Studio"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnPickBg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="1. Pick Background Image" />
+
+        <Button
+            android:id="@+id/btnPickFg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="2. Pick Foreground Cutout (PNG)" />
+
+        <Button
+            android:id="@+id/btnPickFont"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="3. Pick Custom Font (.ttf / .otf)" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clock Vertical Position"
+            android:textColor="#AAAAAA" />
+
+        <SeekBar
+            android:id="@+id/sbTimeY"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:max="100"
+            android:progress="32" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clock Font Size"
+            android:textColor="#AAAAAA" />
+
+        <SeekBar
+            android:id="@+id/sbTimeSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:max="400"
+            android:progress="220" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date Distance Above Time"
+            android:textColor="#AAAAAA" />
+
+        <SeekBar
+            android:id="@+id/sbDateOffset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:max="300"
+            android:progress="140" />
+
+        <Button
+            android:id="@+id/btnSetWallpaper"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#6200EE"
+            android:text="Set as Live Wallpaper"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+</ScrollView>
