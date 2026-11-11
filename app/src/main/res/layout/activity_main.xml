@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- App Header -->
+            <!-- App Title Header -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -27,8 +27,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"
-                android:layout_marginTop="28dp" />
+                android:layout_marginTop="24dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -36,9 +35,52 @@
                 android:text="Layered Wallpaper Studio"
                 android:textColor="#8E919A"
                 android:textSize="14sp"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="18dp" />
 
-            <!-- Section 1: Layers -->
+            <!-- LIVE PREVIEW BOX -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="#1A1C23"
+                app:strokeColor="#2C303B"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:gravity="center_horizontal">
+
+                    <!-- Simulated Phone Viewport (9:16 aspect ratio preview) -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="160dp"
+                        android:layout_height="285dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardBackgroundColor="#000000"
+                        app:strokeColor="#3E4352"
+                        app:strokeWidth="2dp">
+
+                        <ImageView
+                            android:id="@+id/ivPreview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Interactive Live Preview"
+                        android:textColor="#8E919A"
+                        android:textSize="12sp"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SECTION 1: LAYERS -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -49,7 +91,6 @@
                 android:letterSpacing="0.08"
                 android:layout_marginBottom="10dp" />
 
-            <!-- Background Card Button -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardPickBg"
                 android:layout_width="match_parent"
@@ -87,7 +128,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Foreground Card Button -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardPickFg"
                 android:layout_width="match_parent"
@@ -125,7 +165,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Font Card Button -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardPickFont"
                 android:layout_width="match_parent"
@@ -163,7 +202,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section 2: Color Palette -->
+            <!-- SECTION 2: COLOR PALETTE -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -234,7 +273,7 @@
                 </HorizontalScrollView>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section 3: Fine Adjustments -->
+            <!-- SECTION 3: FINE ADJUSTMENTS WITH RESET BUTTONS -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -260,10 +299,13 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Time Vertical Position -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -271,13 +313,25 @@
                             android:text="Vertical Height"
                             android:textColor="#E0E2EC"
                             android:textSize="14sp" />
+
                         <TextView
                             android:id="@+id/tvTimeYVal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="32%"
                             android:textColor="#D0BCFF"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/btnResetTimeY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="RESET"
+                            android:textColor="#8E919A"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:padding="4dp" />
                     </LinearLayout>
 
                     <com.google.android.material.slider.Slider
@@ -291,11 +345,14 @@
                         app:trackColorActive="#D0BCFF"
                         app:trackColorInactive="#3B404E" />
 
+                    <!-- Clock Size -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -303,13 +360,25 @@
                             android:text="Clock Size"
                             android:textColor="#E0E2EC"
                             android:textSize="14sp" />
+
                         <TextView
                             android:id="@+id/tvTimeSizeVal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="220 px"
                             android:textColor="#D0BCFF"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/btnResetTimeSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="RESET"
+                            android:textColor="#8E919A"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:padding="4dp" />
                     </LinearLayout>
 
                     <com.google.android.material.slider.Slider
@@ -323,11 +392,14 @@
                         app:trackColorActive="#D0BCFF"
                         app:trackColorInactive="#3B404E" />
 
+                    <!-- Date Spacing -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
+
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -335,13 +407,25 @@
                             android:text="Date Spacing Above Clock"
                             android:textColor="#E0E2EC"
                             android:textSize="14sp" />
+
                         <TextView
                             android:id="@+id/tvDateOffsetVal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="140 px"
                             android:textColor="#D0BCFF"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/btnResetDateOffset"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="RESET"
+                            android:textColor="#8E919A"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:padding="4dp" />
                     </LinearLayout>
 
                     <com.google.android.material.slider.Slider
@@ -360,7 +444,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Pinned Bottom Action Button -->
+    <!-- Bottom Action Button -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnApplyWallpaper"
         android:layout_width="match_parent"
