@@ -1,5 +1,10 @@
 <resources>
-    <style name="Theme.DepthApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:statusBarColor">#121212</item>
+    <style name="Theme.DepthApp" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">#0E1116</item>
+        <item name="android:navigationBarColor">#0E1116</item>
+        <item name="colorPrimary">#D0BCFF</item>
+        <item name="colorOnPrimary">#381E72</item>
+        <item name="colorSurface">#1A1C23</item>
+        <item name="colorSurfaceVariant">#252932</item>
     </style>
 </resources>
