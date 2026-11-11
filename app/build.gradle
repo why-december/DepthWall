@@ -15,17 +15,7 @@ android {
         versionName "1.1"
     }
 
-    signingConfigs {
-        debug {
-            // Generates a predictable signing configuration to allow in-place updates
-            storeFile file("${System.properties['user.home']}/.android/debug.keystore")
-        }
-    }
-
     buildTypes {
-        debug {
-            signingConfig signingConfigs.debug
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
