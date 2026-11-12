@@ -10,9 +10,13 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.slider.Slider
 import java.io.File
@@ -106,8 +111,10 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialCardView>(R.id.cardPickFg).setOnClickListener { pickFgLauncher.launch("image/png") }
         findViewById<MaterialCardView>(R.id.cardPickFont).setOnClickListener { pickFontLauncher.launch("*/*") }
 
+        // Color Chips + Custom Color Picker
         val chipGroup = findViewById<ChipGroup>(R.id.chipGroupColors)
-        val colors = mapOf(
+        val chipCustom = findViewById<Chip>(R.id.chipCustom)
+        val presetColors = mapOf(
             R.id.chipWhite to Color.WHITE,
             R.id.chipSunset to Color.parseColor("#FF8A65"),
             R.id.chipLavender to Color.parseColor("#D0BCFF"),
@@ -115,19 +122,35 @@ class MainActivity : AppCompatActivity() {
             R.id.chipGold to Color.parseColor("#FFD54F")
         )
 
-        colors.forEach { (chipId, color) ->
+        var matchedPreset = false
+        presetColors.forEach { (chipId, color) ->
             if (settings.timeColor == color) {
                 findViewById<Chip>(chipId)?.isChecked = true
+                matchedPreset = true
             }
+        }
+        if (!matchedPreset) {
+            chipCustom.isChecked = true
         }
 
         chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isNotEmpty()) {
-                colors[checkedIds[0]]?.let { color ->
-                    settings.timeColor = color
-                    updatePreview()
+                val id = checkedIds[0]
+                if (id == R.id.chipCustom) {
+                    showCustomColorDialog(chipCustom)
+                } else {
+                    presetColors[id]?.let { color ->
+                        settings.timeColor = color
+                        updatePreview()
+                    }
                 }
             }
+        }
+
+        // Allow re-tapping the Custom chip even when it's already selected
+        chipCustom.setOnClickListener {
+            chipCustom.isChecked = true
+            showCustomColorDialog(chipCustom)
         }
 
         // Vertical Slider + Reset
@@ -208,11 +231,7 @@ class MainActivity : AppCompatActivity() {
 
         loadBitmaps()
         loadTypeface()
-
-        // Post so the ImageView is measured and drawn on launch
-        ivPreview.post {
-            updatePreview()
-        }
+        ivPreview.post { updatePreview() }
     }
 
     override fun onResume() {
@@ -220,6 +239,74 @@ class MainActivity : AppCompatActivity() {
         loadBitmaps()
         loadTypeface()
         ivPreview.post { updatePreview() }
+    }
+
+    private fun showCustomColorDialog(customChip: Chip) {
+        val currentColor = settings.timeColor
+        var r = Color.red(currentColor)
+        var g = Color.green(currentColor)
+        var b = Color.blue(currentColor)
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(56, 36, 56, 16)
+        }
+
+        val swatch = View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                110
+            ).apply { bottomMargin = 32 }
+            background = GradientDrawable().apply {
+                cornerRadius = 24f
+                setColor(currentColor)
+            }
+        }
+        layout.addView(swatch)
+
+        fun updateSwatch() {
+            val newColor = Color.rgb(r, g, b)
+            (swatch.background as GradientDrawable).setColor(newColor)
+        }
+
+        fun addChannelSlider(label: String, initial: Int, onChange: (Int) -> Unit) {
+            val tv = TextView(this).apply {
+                text = "$label: $initial"
+                setTextColor(Color.parseColor("#E0E2EC"))
+                textSize = 13f
+            }
+            val sb = SeekBar(this).apply {
+                max = 255
+                progress = initial
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                        tv.text = "$label: $p"
+                        onChange(p)
+                        updateSwatch()
+                    }
+                    override fun onStartTrackingTouch(s: SeekBar?) {}
+                    override fun onStopTrackingTouch(s: SeekBar?) {}
+                })
+            }
+            layout.addView(tv)
+            layout.addView(sb)
+        }
+
+        addChannelSlider("Red", r) { r = it }
+        addChannelSlider("Green", g) { g = it }
+        addChannelSlider("Blue", b) { b = it }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Custom Clock Color")
+            .setView(layout)
+            .setPositiveButton("Apply") { _, _ ->
+                val chosen = Color.rgb(r, g, b)
+                settings.timeColor = chosen
+                customChip.isChecked = true
+                updatePreview()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun loadBitmaps() {
@@ -254,7 +341,6 @@ class MainActivity : AppCompatActivity() {
         val previewBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(previewBitmap)
 
-        // 1. Draw Background
         val bg = previewBgBitmap
         if (bg != null) {
             drawCenterCrop(canvas, bg, width, height)
@@ -262,7 +348,6 @@ class MainActivity : AppCompatActivity() {
             canvas.drawColor(Color.parseColor("#1B1F27"))
         }
 
-        // 2. Draw Sandwiched Clock and Date
         val scaleRatio = width / 1080f
         val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = settings.timeColor
@@ -288,7 +373,6 @@ class MainActivity : AppCompatActivity() {
         canvas.drawText(dateStr, centerX, dateY, datePaint)
         canvas.drawText(timeStr, centerX, timeY, timePaint)
 
-        // 3. Draw Foreground Cutout
         val fg = previewFgBitmap
         if (fg != null) {
             drawCenterCrop(canvas, fg, width, height)
