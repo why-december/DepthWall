@@ -6,43 +6,43 @@
     android:layout_height="match_parent"
     android:background="#0E1116">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="100dp"
-        android:clipToPadding="false">
+        android:orientation="vertical">
 
+        <!-- PINNED TOP HEADER & LIVE PREVIEW -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="10dp"
+            android:background="#0E1116">
 
-            <!-- App Title Header -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="DepthWall"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Layered Wallpaper Studio"
                 android:textColor="#8E919A"
-                android:textSize="14sp"
-                android:layout_marginBottom="18dp" />
+                android:textSize="13sp"
+                android:layout_marginBottom="12dp" />
 
-            <!-- LIVE PREVIEW BOX -->
+            <!-- STICKY LIVE PREVIEW BOX -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="20dp"
                 app:cardBackgroundColor="#1A1C23"
                 app:strokeColor="#2C303B"
                 app:strokeWidth="1dp">
@@ -51,14 +51,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="14dp"
+                    android:padding="10dp"
                     android:gravity="center_horizontal">
 
-                    <!-- Simulated Phone Viewport (9:16 aspect ratio preview) -->
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="160dp"
-                        android:layout_height="285dp"
-                        app:cardCornerRadius="18dp"
+                        android:layout_width="135dp"
+                        android:layout_height="240dp"
+                        app:cardCornerRadius="16dp"
                         app:cardBackgroundColor="#000000"
                         app:strokeColor="#3E4352"
                         app:strokeWidth="2dp">
@@ -73,376 +72,402 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Interactive Live Preview"
+                        android:text="Live Preview"
                         android:textColor="#8E919A"
-                        android:textSize="12sp"
-                        android:layout_marginTop="8dp" />
+                        android:textSize="11sp"
+                        android:layout_marginTop="6dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- SECTION 1: LAYERS -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="LAYERS &amp; ASSETS"
-                android:textColor="#D0BCFF"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08"
-                android:layout_marginBottom="10dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPickBg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1A1C23"
-                app:strokeColor="#2C303B"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Background Layer"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvBgStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tap to select base image"
-                        android:textColor="#8E919A"
-                        android:textSize="13sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPickFg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1A1C23"
-                app:strokeColor="#2C303B"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Subject Cutout (Foreground PNG)"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvFgStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tap to select transparent cutout"
-                        android:textColor="#8E919A"
-                        android:textSize="13sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPickFont"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1A1C23"
-                app:strokeColor="#2C303B"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Clock Typeface"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvFontStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Default Bold (tap to import .ttf / .otf)"
-                        android:textColor="#8E919A"
-                        android:textSize="13sp"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- SECTION 2: COLOR PALETTE -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="CLOCK COLOR"
-                android:textColor="#D0BCFF"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08"
-                android:layout_marginBottom="10dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1A1C23"
-                app:strokeColor="#2C303B"
-                app:strokeWidth="1dp">
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    android:padding="14dp">
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupColors"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:singleSelection="true">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipWhite"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Pure White"
-                            android:checked="true" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipSunset"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sunset Orange" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipLavender"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Lavender" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipMint"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Mint Green" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipGold"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Warm Gold" />
-                    </com.google.android.material.chip.ChipGroup>
-                </HorizontalScrollView>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- SECTION 3: FINE ADJUSTMENTS WITH RESET BUTTONS -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="POSITION &amp; PROPORTIONS"
-                android:textColor="#D0BCFF"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08"
-                android:layout_marginBottom="10dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#1A1C23"
-                app:strokeColor="#2C303B"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <!-- Time Vertical Position -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Vertical Height"
-                            android:textColor="#E0E2EC"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvTimeYVal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="32%"
-                            android:textColor="#D0BCFF"
-                            android:textSize="13sp"
-                            android:layout_marginEnd="8dp" />
-
-                        <TextView
-                            android:id="@+id/btnResetTimeY"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="RESET"
-                            android:textColor="#8E919A"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:padding="4dp" />
-                    </LinearLayout>
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderTimeY"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:valueFrom="10.0"
-                        android:valueTo="80.0"
-                        android:value="32.0"
-                        app:thumbColor="#D0BCFF"
-                        app:trackColorActive="#D0BCFF"
-                        app:trackColorInactive="#3B404E" />
-
-                    <!-- Clock Size -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Clock Size"
-                            android:textColor="#E0E2EC"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvTimeSizeVal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="220 px"
-                            android:textColor="#D0BCFF"
-                            android:textSize="13sp"
-                            android:layout_marginEnd="8dp" />
-
-                        <TextView
-                            android:id="@+id/btnResetTimeSize"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="RESET"
-                            android:textColor="#8E919A"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:padding="4dp" />
-                    </LinearLayout>
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderTimeSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:valueFrom="80.0"
-                        android:valueTo="380.0"
-                        android:value="220.0"
-                        app:thumbColor="#D0BCFF"
-                        app:trackColorActive="#D0BCFF"
-                        app:trackColorInactive="#3B404E" />
-
-                    <!-- Date Spacing -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Date Spacing Above Clock"
-                            android:textColor="#E0E2EC"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/tvDateOffsetVal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="140 px"
-                            android:textColor="#D0BCFF"
-                            android:textSize="13sp"
-                            android:layout_marginEnd="8dp" />
-
-                        <TextView
-                            android:id="@+id/btnResetDateOffset"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="RESET"
-                            android:textColor="#8E919A"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:padding="4dp" />
-                    </LinearLayout>
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderDateOffset"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:valueFrom="40.0"
-                        android:valueTo="260.0"
-                        android:value="140.0"
-                        app:thumbColor="#D0BCFF"
-                        app:trackColorActive="#D0BCFF"
-                        app:trackColorInactive="#3B404E" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+        <!-- SCROLLABLE CONTROLS SECTION -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- SECTION 1: LAYERS -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LAYERS &amp; ASSETS"
+                    android:textColor="#D0BCFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPickBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1C23"
+                    app:strokeColor="#2C303B"
+                    app:strokeWidth="1dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Background Layer"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvBgStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tap to select base image"
+                            android:textColor="#8E919A"
+                            android:textSize="13sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPickFg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1C23"
+                    app:strokeColor="#2C303B"
+                    app:strokeWidth="1dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Subject Cutout (Foreground PNG)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvFgStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tap to select transparent cutout"
+                            android:textColor="#8E919A"
+                            android:textSize="13sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPickFont"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1C23"
+                    app:strokeColor="#2C303B"
+                    app:strokeWidth="1dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Clock Typeface"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvFontStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Default Bold (tap to import .ttf / .otf)"
+                            android:textColor="#8E919A"
+                            android:textSize="13sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- SECTION 2: COLOR PALETTE -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CLOCK COLOR"
+                    android:textColor="#D0BCFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1C23"
+                    app:strokeColor="#2C303B"
+                    app:strokeWidth="1dp">
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:padding="14dp">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/chipGroupColors"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:singleSelection="true">
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipWhite"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Pure White"
+                                android:checked="true" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipSunset"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sunset Orange" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipLavender"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Lavender" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipMint"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mint Green" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipGold"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Warm Gold" />
+
+                            <!-- CUSTOM COLOR CHIP AT THE END -->
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipCustom"
+                                style="@style/Widget.Material3.Chip.Filter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Custom Color..." />
+                        </com.google.android.material.chip.ChipGroup>
+                    </HorizontalScrollView>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- SECTION 3: FINE ADJUSTMENTS -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="POSITION &amp; PROPORTIONS"
+                    android:textColor="#D0BCFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:layout_marginBottom="10dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#1A1C23"
+                    app:strokeColor="#2C303B"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <!-- Time Vertical Position -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Vertical Height"
+                                android:textColor="#E0E2EC"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvTimeYVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="32%"
+                                android:textColor="#D0BCFF"
+                                android:textSize="13sp"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:id="@+id/btnResetTimeY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="RESET"
+                                android:textColor="#8E919A"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:padding="4dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderTimeY"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="10.0"
+                            android:valueTo="80.0"
+                            android:value="32.0"
+                            app:thumbColor="#D0BCFF"
+                            app:trackColorActive="#D0BCFF"
+                            app:trackColorInactive="#3B404E" />
+
+                        <!-- Clock Size -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Clock Size"
+                                android:textColor="#E0E2EC"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvTimeSizeVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="220 px"
+                                android:textColor="#D0BCFF"
+                                android:textSize="13sp"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:id="@+id/btnResetTimeSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="RESET"
+                                android:textColor="#8E919A"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:padding="4dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderTimeSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="80.0"
+                            android:valueTo="380.0"
+                            android:value="220.0"
+                            app:thumbColor="#D0BCFF"
+                            app:trackColorActive="#D0BCFF"
+                            app:trackColorInactive="#3B404E" />
+
+                        <!-- Date Spacing -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Date Spacing Above Clock"
+                                android:textColor="#E0E2EC"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvDateOffsetVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="140 px"
+                                android:textColor="#D0BCFF"
+                                android:textSize="13sp"
+                                android:layout_marginEnd="8dp" />
+
+                            <TextView
+                                android:id="@+id/btnResetDateOffset"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="RESET"
+                                android:textColor="#8E919A"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:padding="4dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderDateOffset"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="40.0"
+                            android:valueTo="260.0"
+                            android:value="140.0"
+                            app:thumbColor="#D0BCFF"
+                            app:trackColorActive="#D0BCFF"
+                            app:trackColorInactive="#3B404E" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
     <!-- Bottom Action Button -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
