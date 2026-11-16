@@ -129,7 +129,6 @@ class DepthWallpaperService : WallpaperService() {
                     val width = canvas.width
                     val height = canvas.height
 
-                    // 1. Background Layer
                     bgBitmap?.let {
                         drawCenterCrop(canvas, it, width, height)
                     } ?: canvas.drawColor(Color.DKGRAY)
@@ -144,29 +143,27 @@ class DepthWallpaperService : WallpaperService() {
                     val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
                     val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
 
-                    val centerX = width / 2f
-                    val timeY = height * settings.timeYPercent
-                    val dateY = timeY - settings.dateOffset
+                    val clockX = width * settings.timeXPercent
+                    val clockY = height * settings.timeYPercent
+                    val dateX = width * settings.dateXPercent
+                    val dateY = height * settings.dateYPercent
 
-                    // 2. Elements placed BEHIND foreground subject
                     if (!settings.dateInFront) {
-                        canvas.drawText(dateStr, centerX, dateY, datePaint)
+                        canvas.drawText(dateStr, dateX, dateY, datePaint)
                     }
                     if (!settings.clockInFront) {
-                        canvas.drawText(timeStr, centerX, timeY, timePaint)
+                        canvas.drawText(timeStr, clockX, clockY, timePaint)
                     }
 
-                    // 3. Foreground Cutout
                     fgBitmap?.let {
                         drawCenterCrop(canvas, it, width, height)
                     }
 
-                    // 4. Elements placed IN FRONT OF foreground subject
                     if (settings.dateInFront) {
-                        canvas.drawText(dateStr, centerX, dateY, datePaint)
+                        canvas.drawText(dateStr, dateX, dateY, datePaint)
                     }
                     if (settings.clockInFront) {
-                        canvas.drawText(timeStr, centerX, timeY, timePaint)
+                        canvas.drawText(timeStr, clockX, clockY, timePaint)
                     }
                 }
             } finally {
