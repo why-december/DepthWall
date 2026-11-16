@@ -28,7 +28,8 @@ class DepthWallpaperService : WallpaperService() {
 
         private var bgBitmap: Bitmap? = null
         private var fgBitmap: Bitmap? = null
-        private var customTypeface: Typeface = Typeface.DEFAULT_BOLD
+        private var clockTypeface: Typeface = Typeface.DEFAULT_BOLD
+        private var dateTypeface: Typeface = Typeface.DEFAULT
 
         private val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             textAlign = Paint.Align.CENTER
@@ -80,7 +81,15 @@ class DepthWallpaperService : WallpaperService() {
                 val file = File(path)
                 if (file.exists()) {
                     try {
-                        customTypeface = Typeface.createFromFile(file)
+                        clockTypeface = Typeface.createFromFile(file)
+                    } catch (_: Exception) {}
+                }
+            }
+            settings.dateFontPath?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    try {
+                        dateTypeface = Typeface.createFromFile(file)
                     } catch (_: Exception) {}
                 }
             }
@@ -120,15 +129,16 @@ class DepthWallpaperService : WallpaperService() {
                     val width = canvas.width
                     val height = canvas.height
 
-                    // 1. Draw Background
+                    // 1. Background Layer
                     bgBitmap?.let {
                         drawCenterCrop(canvas, it, width, height)
                     } ?: canvas.drawColor(Color.DKGRAY)
 
-                    // 2. Draw Sandwiched Time & Date
                     timePaint.color = settings.timeColor
                     timePaint.textSize = settings.timeSize
-                    timePaint.typeface = customTypeface
+                    timePaint.typeface = clockTypeface
+
+                    datePaint.typeface = dateTypeface
 
                     val now = Date()
                     val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
@@ -138,12 +148,25 @@ class DepthWallpaperService : WallpaperService() {
                     val timeY = height * settings.timeYPercent
                     val dateY = timeY - settings.dateOffset
 
-                    canvas.drawText(dateStr, centerX, dateY, datePaint)
-                    canvas.drawText(timeStr, centerX, timeY, timePaint)
+                    // 2. Elements placed BEHIND foreground subject
+                    if (!settings.dateInFront) {
+                        canvas.drawText(dateStr, centerX, dateY, datePaint)
+                    }
+                    if (!settings.clockInFront) {
+                        canvas.drawText(timeStr, centerX, timeY, timePaint)
+                    }
 
-                    // 3. Draw Foreground Cutout
+                    // 3. Foreground Cutout
                     fgBitmap?.let {
                         drawCenterCrop(canvas, it, width, height)
+                    }
+
+                    // 4. Elements placed IN FRONT OF foreground subject
+                    if (settings.dateInFront) {
+                        canvas.drawText(dateStr, centerX, dateY, datePaint)
+                    }
+                    if (settings.clockInFront) {
+                        canvas.drawText(timeStr, centerX, timeY, timePaint)
                     }
                 }
             } finally {
