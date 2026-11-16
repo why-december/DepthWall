@@ -8,9 +8,21 @@ class SettingsManager(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("depth_wallpaper_prefs", Context.MODE_PRIVATE)
 
+    var timeXPercent: Float
+        get() = prefs.getFloat("time_x_percent", 0.50f)
+        set(value) = prefs.edit().putFloat("time_x_percent", value).apply()
+
     var timeYPercent: Float
         get() = prefs.getFloat("time_y_percent", 0.32f)
         set(value) = prefs.edit().putFloat("time_y_percent", value).apply()
+
+    var dateXPercent: Float
+        get() = prefs.getFloat("date_x_percent", 0.50f)
+        set(value) = prefs.edit().putFloat("date_x_percent", value).apply()
+
+    var dateYPercent: Float
+        get() = prefs.getFloat("date_y_percent", 0.24f)
+        set(value) = prefs.edit().putFloat("date_y_percent", value).apply()
 
     var timeSize: Float
         get() = prefs.getFloat("time_size", 220f)
