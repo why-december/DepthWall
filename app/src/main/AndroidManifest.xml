@@ -7,8 +7,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:label="Depth Wallpaper"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
         android:theme="@style/Theme.DepthApp">
 
         <activity
@@ -22,9 +23,10 @@
 
         <service
             android:name=".DepthWallpaperService"
-            android:label="Depth Live Wallpaper"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:exported="true">
+            android:enabled="true"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
