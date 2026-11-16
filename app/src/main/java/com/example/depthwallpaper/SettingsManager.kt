@@ -35,4 +35,16 @@ class SettingsManager(context: Context) {
     var fontPath: String?
         get() = prefs.getString("font_path", null)
         set(value) = prefs.edit().putString("font_path", value).apply()
+
+    var dateFontPath: String?
+        get() = prefs.getString("date_font_path", null)
+        set(value) = prefs.edit().putString("date_font_path", value).apply()
+
+    var clockInFront: Boolean
+        get() = prefs.getBoolean("clock_in_front", false)
+        set(value) = prefs.edit().putBoolean("clock_in_front", value).apply()
+
+    var dateInFront: Boolean
+        get() = prefs.getBoolean("date_in_front", false)
+        set(value) = prefs.edit().putBoolean("date_in_front", value).apply()
 }
