@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.WallpaperManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -300,7 +301,130 @@ class MainActivity : AppCompatActivity() {
         ivPreview.post { updatePreview() }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    inner class TouchEditorView(context: Context) : View(context) {
+        private var activeTarget = 0
+        private var lastTouchX = 0f
+        private var lastTouchY = 0f
+
+        private val guidePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#80D0BCFF")
+            style = Paint.Style.STROKE
+            strokeWidth = 3f
+            pathEffect = DashPathEffect(floatArrayOf(14f, 10f), 0f)
+        }
+
+        override fun onDraw(canvas: Canvas) {
+            super.onDraw(canvas)
+            val w = width
+            val h = height
+            if (w <= 0 || h <= 0) return
+
+            val bg = previewBgBitmap
+            if (bg != null) {
+                drawCenterCrop(canvas, bg, w, h)
+            } else {
+                canvas.drawColor(Color.parseColor("#1B1F27"))
+            }
+
+            val scaleRatio = w / 1080f
+            val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = settings.timeColor
+                textSize = settings.timeSize * scaleRatio
+                typeface = previewClockTypeface
+                textAlign = Paint.Align.CENTER
+            }
+            val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#E0E0E0")
+                textSize = 50f * scaleRatio
+                typeface = previewDateTypeface
+                textAlign = Paint.Align.CENTER
+            }
+
+            val now = Date()
+            val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+            val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
+
+            val clockX = w * settings.timeXPercent
+            val clockY = h * settings.timeYPercent
+            val dateX = w * settings.dateXPercent
+            val dateY = h * settings.dateYPercent
+
+            if (!settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
+            if (!settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
+
+            val fg = previewFgBitmap
+            if (fg != null) drawCenterCrop(canvas, fg, w, h)
+
+            if (settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
+            if (settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
+
+            val timeWidth = timePaint.measureText(timeStr)
+            val timeHeight = timePaint.textSize * 0.75f
+            canvas.drawRoundRect(
+                RectF(clockX - timeWidth / 2f - 20f, clockY - timeHeight - 16f, clockX + timeWidth / 2f + 20f, clockY + 20f),
+                16f, 16f, guidePaint
+            )
+
+            val dateWidth = datePaint.measureText(dateStr)
+            val dateHeight = datePaint.textSize * 0.85f
+            canvas.drawRoundRect(
+                RectF(dateX - dateWidth / 2f - 16f, dateY - dateHeight - 12f, dateX + dateWidth / 2f + 16f, dateY + 14f),
+                12f, 12f, guidePaint
+            )
+        }
+
+        @SuppressLint("ClickableViewAccessibility")
+        override fun onTouchEvent(event: MotionEvent): Boolean {
+            val w = width.toFloat()
+            val h = height.toFloat()
+            if (w <= 0f || h <= 0f) return false
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    lastTouchX = event.x
+                    lastTouchY = event.y
+
+                    val clockX = w * settings.timeXPercent
+                    val clockY = h * settings.timeYPercent - 40f
+                    val dateX = w * settings.dateXPercent
+                    val dateY = h * settings.dateYPercent - 15f
+
+                    val distClock = hypot(event.x - clockX, event.y - clockY)
+                    val distDate = hypot(event.x - dateX, event.y - dateY)
+
+                    activeTarget = when {
+                        distDate < 150f && distDate < distClock -> 2
+                        distClock < 260f -> 1
+                        else -> 0
+                    }
+                    return true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = (event.x - lastTouchX) / w
+                    val dy = (event.y - lastTouchY) / h
+                    lastTouchX = event.x
+                    lastTouchY = event.y
+
+                    if (activeTarget == 1) {
+                        settings.timeXPercent = (settings.timeXPercent + dx).coerceIn(0.05f, 0.95f)
+                        settings.timeYPercent = (settings.timeYPercent + dy).coerceIn(0.08f, 0.95f)
+                        invalidate()
+                    } else if (activeTarget == 2) {
+                        settings.dateXPercent = (settings.dateXPercent + dx).coerceIn(0.05f, 0.95f)
+                        settings.dateYPercent = (settings.dateYPercent + dy).coerceIn(0.05f, 0.95f)
+                        invalidate()
+                    }
+                    return true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    activeTarget = 0
+                    return true
+                }
+            }
+            return super.onTouchEvent(event)
+        }
+    }
+
     private fun openFullscreenTouchEditor() {
         val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
@@ -308,128 +432,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor(Color.parseColor("#0E1116"))
         }
 
-        val interactiveView = object : View(this) {
-            private var activeTarget = 0
-            private var lastTouchX = 0f
-            private var lastTouchY = 0f
-
-            private val guidePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#80D0BCFF")
-                style = Paint.Style.STROKE
-                strokeWidth = 3f
-                pathEffect = DashPathEffect(floatArrayOf(14f, 10f), 0f)
-            }
-
-            override fun onDraw(canvas: Canvas) {
-                super.onDraw(canvas)
-                val w = width
-                val h = height
-                if (w <= 0 || h <= 0) return
-
-                val bg = previewBgBitmap
-                if (bg != null) {
-                    drawCenterCrop(canvas, bg, w, h)
-                } else {
-                    canvas.drawColor(Color.parseColor("#1B1F27"))
-                }
-
-                val scaleRatio = w / 1080f
-                val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = settings.timeColor
-                    textSize = settings.timeSize * scaleRatio
-                    typeface = previewClockTypeface
-                    textAlign = Paint.Align.CENTER
-                }
-                val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#E0E0E0")
-                    textSize = 50f * scaleRatio
-                    typeface = previewDateTypeface
-                    textAlign = Paint.Align.CENTER
-                }
-
-                val now = Date()
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
-                val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
-
-                val clockX = w * settings.timeXPercent
-                val clockY = h * settings.timeYPercent
-                val dateX = w * settings.dateXPercent
-                val dateY = h * settings.dateYPercent
-
-                if (!settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
-                if (!settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
-
-                val fg = previewFgBitmap
-                if (fg != null) drawCenterCrop(canvas, fg, w, h)
-
-                if (settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
-                if (settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
-
-                val timeWidth = timePaint.measureText(timeStr)
-                val timeHeight = timePaint.textSize * 0.75f
-                canvas.drawRoundRect(
-                    RectF(clockX - timeWidth / 2f - 20f, clockY - timeHeight - 16f, clockX + timeWidth / 2f + 20f, clockY + 20f),
-                    16f, 16f, guidePaint
-                )
-
-                val dateWidth = datePaint.measureText(dateStr)
-                val dateHeight = datePaint.textSize * 0.85f
-                canvas.drawRoundRect(
-                    RectF(dateX - dateWidth / 2f - 16f, dateY - dateHeight - 12f, dateX + dateWidth / 2f + 16f, dateY + 14f),
-                    12f, 12f, guidePaint
-                )
-            }
-
-            override fun onTouchEvent(event: MotionEvent): Boolean {
-                val w = width.toFloat()
-                val h = height.toFloat()
-                if (w <= 0f || h <= 0f) return false
-
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        lastTouchX = event.x
-                        lastTouchY = event.y
-
-                        val clockX = w * settings.timeXPercent
-                        val clockY = h * settings.timeYPercent - 40f
-                        val dateX = w * settings.dateXPercent
-                        val dateY = h * settings.dateYPercent - 15f
-
-                        val distClock = hypot(event.x - clockX, event.y - clockY)
-                        val distDate = hypot(event.x - dateX, event.y - dateY)
-
-                        activeTarget = when {
-                            distDate < 150f && distDate < distClock -> 2
-                            distClock < 260f -> 1
-                            else -> 0
-                        }
-                        return true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        val dx = (event.x - lastTouchX) / w
-                        val dy = (event.y - lastTouchY) / h
-                        lastTouchX = event.x
-                        lastTouchY = event.y
-
-                        if (activeTarget == 1) {
-                            settings.timeXPercent = (settings.timeXPercent + dx).coerceIn(0.05f, 0.95f)
-                            settings.timeYPercent = (settings.timeYPercent + dy).coerceIn(0.08f, 0.95f)
-                            invalidate()
-                        } else if (activeTarget == 2) {
-                            settings.dateXPercent = (settings.dateXPercent + dx).coerceIn(0.05f, 0.95f)
-                            settings.dateYPercent = (settings.dateYPercent + dy).coerceIn(0.05f, 0.95f)
-                            invalidate()
-                        }
-                        return true
-                    }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        activeTarget = 0
-                        return true
-                    }
-                }
-                return super.onTouchEvent(event)
-            }
-        }
+        val interactiveView = TouchEditorView(this)
 
         val hintBanner = TextView(this).apply {
             text = "Drag Clock or Date freely anywhere"
@@ -667,4 +670,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-// END OF FILE
