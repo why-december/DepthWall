@@ -125,7 +125,6 @@ class MainActivity : AppCompatActivity() {
         tvFontStatus = findViewById(R.id.tvFontStatus)
         tvDateFontStatus = findViewById(R.id.tvDateFontStatus)
 
-        // Tap preview box to launch enlarged touch-drag editor
         ivPreview.setOnClickListener {
             openFullscreenTouchEditor()
         }
@@ -208,7 +207,6 @@ class MainActivity : AppCompatActivity() {
             showCustomColorDialog(chipCustom)
         }
 
-        // Vertical Slider + Reset (Also resets X back to center)
         tvTimeYVal = findViewById(R.id.tvTimeYVal)
         sliderTimeY = findViewById(R.id.sliderTimeY)
         val btnResetTimeY = findViewById<TextView>(R.id.btnResetTimeY)
@@ -235,8 +233,7 @@ class MainActivity : AppCompatActivity() {
             updatePreview()
         }
 
-        // Size Slider + Reset
-        val tvTimeSizeVal = findViewById<TextView>(R.id.tvTimeSizeVal)
+        val tvTimeSizeVal = findViewById(R.id.tvTimeSizeVal)
         val sliderTimeSize = findViewById<Slider>(R.id.sliderTimeSize)
         val btnResetTimeSize = findViewById<TextView>(R.id.btnResetTimeSize)
 
@@ -257,7 +254,6 @@ class MainActivity : AppCompatActivity() {
             updatePreview()
         }
 
-        // Date Spacing Slider + Reset
         tvDateOffsetVal = findViewById(R.id.tvDateOffsetVal)
         sliderDateOffset = findViewById(R.id.sliderDateOffset)
         val btnResetDateOffset = findViewById<TextView>(R.id.btnResetDateOffset)
@@ -313,7 +309,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val interactiveView = object : View(this) {
-            private var activeTarget = 0 // 0 = none, 1 = clock, 2 = date
+            private var activeTarget = 0
             private var lastTouchX = 0f
             private var lastTouchY = 0f
 
@@ -330,7 +326,6 @@ class MainActivity : AppCompatActivity() {
                 val h = height
                 if (w <= 0 || h <= 0) return
 
-                // 1. Background
                 val bg = previewBgBitmap
                 if (bg != null) {
                     drawCenterCrop(canvas, bg, w, h)
@@ -361,19 +356,15 @@ class MainActivity : AppCompatActivity() {
                 val dateX = w * settings.dateXPercent
                 val dateY = h * settings.dateYPercent
 
-                // 2. Behind Cutout
                 if (!settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
                 if (!settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
 
-                // 3. Foreground Cutout
                 val fg = previewFgBitmap
                 if (fg != null) drawCenterCrop(canvas, fg, w, h)
 
-                // 4. In Front of Cutout
                 if (settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
                 if (settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
 
-                // 5. Draw subtle dashed bounding boxes so elements are easy to grab
                 val timeWidth = timePaint.measureText(timeStr)
                 val timeHeight = timePaint.textSize * 0.75f
                 canvas.drawRoundRect(
@@ -440,7 +431,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Top instructional banner
         val hintBanner = TextView(this).apply {
             text = "Drag Clock or Date freely anywhere"
             setTextColor(Color.WHITE)
@@ -455,7 +445,6 @@ class MainActivity : AppCompatActivity() {
             ).apply { topMargin = 48 }
         }
 
-        // Done Button at bottom
         val doneBtn = MaterialButton(this).apply {
             text = "Done Positioning"
             setTextColor(Color.parseColor("#381E72"))
@@ -495,4 +484,187 @@ class MainActivity : AppCompatActivity() {
         }
 
         val swatch = View(this).apply {
-            layoutParams = Lin
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                110
+            ).apply { bottomMargin = 32 }
+            background = GradientDrawable().apply {
+                cornerRadius = 24f
+                setColor(currentColor)
+            }
+        }
+        layout.addView(swatch)
+
+        fun updateSwatch() {
+            val newColor = Color.rgb(r, g, b)
+            (swatch.background as GradientDrawable).setColor(newColor)
+        }
+
+        fun addChannelSlider(label: String, initial: Int, onChange: (Int) -> Unit) {
+            val tv = TextView(this).apply {
+                text = "$label: $initial"
+                setTextColor(Color.parseColor("#E0E2EC"))
+                textSize = 13f
+            }
+            val sb = SeekBar(this).apply {
+                max = 255
+                progress = initial
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                        tv.text = "$label: $p"
+                        onChange(p)
+                        updateSwatch()
+                    }
+                    override fun onStartTrackingTouch(s: SeekBar?) {}
+                    override fun onStopTrackingTouch(s: SeekBar?) {}
+                })
+            }
+            layout.addView(tv)
+            layout.addView(sb)
+        }
+
+        addChannelSlider("Red", r) { r = it }
+        addChannelSlider("Green", g) { g = it }
+        addChannelSlider("Blue", b) { b = it }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Custom Clock Color")
+            .setView(layout)
+            .setPositiveButton("Apply") { _, _ ->
+                val chosen = Color.rgb(r, g, b)
+                settings.timeColor = chosen
+                customChip.isChecked = true
+                updatePreview()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun loadBitmaps() {
+        settings.bgPath?.let { path ->
+            val file = File(path)
+            if (file.exists()) {
+                previewBgBitmap = BitmapFactory.decodeFile(file.absolutePath)
+            }
+        }
+        settings.fgPath?.let { path ->
+            val file = File(path)
+            if (file.exists()) {
+                previewFgBitmap = BitmapFactory.decodeFile(file.absolutePath)
+            }
+        }
+    }
+
+    private fun loadTypefaces() {
+        settings.fontPath?.let { path ->
+            val file = File(path)
+            if (file.exists()) {
+                try {
+                    previewClockTypeface = Typeface.createFromFile(file)
+                } catch (_: Exception) {}
+            }
+        }
+        settings.dateFontPath?.let { path ->
+            val file = File(path)
+            if (file.exists()) {
+                try {
+                    previewDateTypeface = Typeface.createFromFile(file)
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    private fun updatePreview() {
+        val width = 360
+        val height = 640
+        val previewBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(previewBitmap)
+
+        val bg = previewBgBitmap
+        if (bg != null) {
+            drawCenterCrop(canvas, bg, width, height)
+        } else {
+            canvas.drawColor(Color.parseColor("#1B1F27"))
+        }
+
+        val scaleRatio = width / 1080f
+        val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = settings.timeColor
+            textSize = settings.timeSize * scaleRatio
+            typeface = previewClockTypeface
+            textAlign = Paint.Align.CENTER
+        }
+
+        val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#E0E0E0")
+            textSize = 50f * scaleRatio
+            typeface = previewDateTypeface
+            textAlign = Paint.Align.CENTER
+        }
+
+        val now = Date()
+        val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+        val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
+
+        val clockX = width * settings.timeXPercent
+        val clockY = height * settings.timeYPercent
+        val dateX = width * settings.dateXPercent
+        val dateY = height * settings.dateYPercent
+
+        if (!settings.dateInFront) {
+            canvas.drawText(dateStr, dateX, dateY, datePaint)
+        }
+        if (!settings.clockInFront) {
+            canvas.drawText(timeStr, clockX, clockY, timePaint)
+        }
+
+        val fg = previewFgBitmap
+        if (fg != null) {
+            drawCenterCrop(canvas, fg, width, height)
+        }
+
+        if (settings.dateInFront) {
+            canvas.drawText(dateStr, dateX, dateY, datePaint)
+        }
+        if (settings.clockInFront) {
+            canvas.drawText(timeStr, clockX, clockY, timePaint)
+        }
+
+        ivPreview.setImageBitmap(previewBitmap)
+    }
+
+    private fun drawCenterCrop(canvas: Canvas, bitmap: Bitmap, viewWidth: Int, viewHeight: Int) {
+        val bitmapWidth = bitmap.width.toFloat()
+        val bitmapHeight = bitmap.height.toFloat()
+        if (bitmapWidth <= 0 || bitmapHeight <= 0) return
+
+        val scale = max(viewWidth / bitmapWidth, viewHeight / bitmapHeight)
+        val scaledWidth = scale * bitmapWidth
+        val scaledHeight = scale * bitmapHeight
+
+        val dx = (viewWidth - scaledWidth) / 2f
+        val dy = (viewHeight - scaledHeight) / 2f
+
+        val matrix = Matrix().apply {
+            postScale(scale, scale)
+            postTranslate(dx, dy)
+        }
+        canvas.drawBitmap(bitmap, matrix, null)
+    }
+
+    private fun saveFileToInternal(uri: Uri, filename: String): String? {
+        return try {
+            val destination = File(filesDir, filename)
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(destination).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            destination.absolutePath
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to load file", Toast.LENGTH_SHORT).show()
+            null
+        }
+    }
+}
+// END OF FILE
