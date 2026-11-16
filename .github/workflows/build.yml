@@ -24,11 +24,18 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      # Creates the consistent debug keystore with the official standard Android debug credentials
-      - name: Create Consistent Debug Keystore
+      - name: Create Deterministic Debug Keystore
         run: |
-          mkdir -p ~/.android
-          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          keytool -genkeypair -v \
+            -keystore app/consistent-debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -startdate "2026/01/01 00:00:00" \
+            -dname "CN=DepthWall,O=VisualBench,C=IN"
 
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon
