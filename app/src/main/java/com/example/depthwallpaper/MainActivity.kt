@@ -1,25 +1,20 @@
 package com.example.depthwallpaper
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.WallpaperManager
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.DashPathEffect
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -43,23 +38,18 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.hypot
 import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var settings: SettingsManager
-
     private lateinit var ivPreview: ImageView
     private lateinit var tvBgStatus: TextView
     private lateinit var tvFgStatus: TextView
     private lateinit var tvFontStatus: TextView
     private lateinit var tvDateFontStatus: TextView
-
     private lateinit var sliderTimeY: Slider
     private lateinit var tvTimeYVal: TextView
-    private lateinit var sliderDateOffset: Slider
-    private lateinit var tvDateOffsetVal: TextView
 
     private var previewBgBitmap: Bitmap? = null
     private var previewFgBitmap: Bitmap? = null
@@ -119,33 +109,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         settings = SettingsManager(this)
-
         ivPreview = findViewById(R.id.ivPreview)
         tvBgStatus = findViewById(R.id.tvBgStatus)
         tvFgStatus = findViewById(R.id.tvFgStatus)
         tvFontStatus = findViewById(R.id.tvFontStatus)
         tvDateFontStatus = findViewById(R.id.tvDateFontStatus)
 
-        ivPreview.setOnClickListener {
-            openFullscreenTouchEditor()
-        }
+        ivPreview.setOnClickListener { openFullscreenTouchEditor() }
 
-        if (settings.bgPath != null) {
-            tvBgStatus.text = "Background set ✓"
-            tvBgStatus.setTextColor(Color.parseColor("#80D49E"))
-        }
-        if (settings.fgPath != null) {
-            tvFgStatus.text = "Cutout loaded ✓"
-            tvFgStatus.setTextColor(Color.parseColor("#80D49E"))
-        }
-        if (settings.fontPath != null) {
-            tvFontStatus.text = "Custom clock font ✓"
-            tvFontStatus.setTextColor(Color.parseColor("#80D49E"))
-        }
-        if (settings.dateFontPath != null) {
-            tvDateFontStatus.text = "Custom date font ✓"
-            tvDateFontStatus.setTextColor(Color.parseColor("#80D49E"))
-        }
+        if (settings.bgPath != null) { tvBgStatus.text = "Background set ✓"; tvBgStatus.setTextColor(Color.parseColor("#80D49E")) }
+        if (settings.fgPath != null) { tvFgStatus.text = "Cutout loaded ✓"; tvFgStatus.setTextColor(Color.parseColor("#80D49E")) }
+        if (settings.fontPath != null) { tvFontStatus.text = "Custom clock font ✓"; tvFontStatus.setTextColor(Color.parseColor("#80D49E")) }
+        if (settings.dateFontPath != null) { tvDateFontStatus.text = "Custom date font ✓"; tvDateFontStatus.setTextColor(Color.parseColor("#80D49E")) }
 
         findViewById<MaterialCardView>(R.id.cardPickBg).setOnClickListener { pickBgLauncher.launch("image/*") }
         findViewById<MaterialCardView>(R.id.cardPickFg).setOnClickListener { pickFgLauncher.launch("image/png") }
@@ -154,19 +129,10 @@ class MainActivity : AppCompatActivity() {
 
         val cbClockInFront = findViewById<MaterialCheckBox>(R.id.cbClockInFront)
         val cbDateInFront = findViewById<MaterialCheckBox>(R.id.cbDateInFront)
-
         cbClockInFront.isChecked = settings.clockInFront
         cbDateInFront.isChecked = settings.dateInFront
-
-        cbClockInFront.setOnCheckedChangeListener { _, isChecked ->
-            settings.clockInFront = isChecked
-            updatePreview()
-        }
-
-        cbDateInFront.setOnCheckedChangeListener { _, isChecked ->
-            settings.dateInFront = isChecked
-            updatePreview()
-        }
+        cbClockInFront.setOnCheckedChangeListener { _, isChecked -> settings.clockInFront = isChecked; updatePreview() }
+        cbDateInFront.setOnCheckedChangeListener { _, isChecked -> settings.dateInFront = isChecked; updatePreview() }
 
         val chipGroup = findViewById<ChipGroup>(R.id.chipGroupColors)
         val chipCustom = findViewById<Chip>(R.id.chipCustom)
@@ -180,38 +146,21 @@ class MainActivity : AppCompatActivity() {
 
         var matchedPreset = false
         presetColors.forEach { (chipId, color) ->
-            if (settings.timeColor == color) {
-                findViewById<Chip>(chipId)?.isChecked = true
-                matchedPreset = true
-            }
+            if (settings.timeColor == color) { findViewById<Chip>(chipId)?.isChecked = true; matchedPreset = true }
         }
-        if (!matchedPreset) {
-            chipCustom.isChecked = true
-        }
+        if (!matchedPreset) chipCustom.isChecked = true
 
         chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isNotEmpty()) {
                 val id = checkedIds[0]
-                if (id == R.id.chipCustom) {
-                    showCustomColorDialog(chipCustom)
-                } else {
-                    presetColors[id]?.let { color ->
-                        settings.timeColor = color
-                        updatePreview()
-                    }
-                }
+                if (id == R.id.chipCustom) showCustomColorDialog(chipCustom)
+                else presetColors[id]?.let { settings.timeColor = it; updatePreview() }
             }
         }
-
-        chipCustom.setOnClickListener {
-            chipCustom.isChecked = true
-            showCustomColorDialog(chipCustom)
-        }
+        chipCustom.setOnClickListener { chipCustom.isChecked = true; showCustomColorDialog(chipCustom) }
 
         tvTimeYVal = findViewById(R.id.tvTimeYVal)
         sliderTimeY = findViewById(R.id.sliderTimeY)
-        val btnResetTimeY = findViewById<TextView>(R.id.btnResetTimeY)
-
         val currentPercent = (settings.timeYPercent * 100f).coerceIn(10f, 80f)
         sliderTimeY.value = currentPercent
         tvTimeYVal.text = "${currentPercent.toInt()}%"
@@ -224,41 +173,28 @@ class MainActivity : AppCompatActivity() {
                 updatePreview()
             }
         }
-        btnResetTimeY.setOnClickListener {
+        findViewById<TextView>(R.id.btnResetTimeY).setOnClickListener {
             sliderTimeY.value = 32f
-            settings.timeXPercent = 0.50f
-            settings.timeYPercent = 0.32f
-            settings.dateXPercent = 0.50f
-            settings.dateYPercent = 0.24f
+            settings.timeXPercent = 0.50f; settings.timeYPercent = 0.32f
+            settings.dateXPercent = 0.50f; settings.dateYPercent = 0.24f
             tvTimeYVal.text = "32%"
             updatePreview()
         }
 
-        val tvTimeSizeVal = findViewById(R.id.tvTimeSizeVal)
+        val tvTimeSizeVal = findViewById<TextView>(R.id.tvTimeSizeVal)
         val sliderTimeSize = findViewById<Slider>(R.id.sliderTimeSize)
-        val btnResetTimeSize = findViewById<TextView>(R.id.btnResetTimeSize)
-
         val currentSize = settings.timeSize.coerceIn(80f, 380f)
         sliderTimeSize.value = currentSize
         tvTimeSizeVal.text = "${currentSize.toInt()} px"
         sliderTimeSize.addOnChangeListener { _, value, fromUser ->
-            if (fromUser) {
-                settings.timeSize = value
-                tvTimeSizeVal.text = "${value.toInt()} px"
-                updatePreview()
-            }
+            if (fromUser) { settings.timeSize = value; tvTimeSizeVal.text = "${value.toInt()} px"; updatePreview() }
         }
-        btnResetTimeSize.setOnClickListener {
-            sliderTimeSize.value = 220f
-            settings.timeSize = 220f
-            tvTimeSizeVal.text = "220 px"
-            updatePreview()
+        findViewById<TextView>(R.id.btnResetTimeSize).setOnClickListener {
+            sliderTimeSize.value = 220f; settings.timeSize = 220f; tvTimeSizeVal.text = "220 px"; updatePreview()
         }
 
-        tvDateOffsetVal = findViewById(R.id.tvDateOffsetVal)
-        sliderDateOffset = findViewById(R.id.sliderDateOffset)
-        val btnResetDateOffset = findViewById<TextView>(R.id.btnResetDateOffset)
-
+        val tvDateOffsetVal = findViewById<TextView>(R.id.tvDateOffsetVal)
+        val sliderDateOffset = findViewById<Slider>(R.id.sliderDateOffset)
         val currentOffset = settings.dateOffset.coerceIn(40f, 260f)
         sliderDateOffset.value = currentOffset
         tvDateOffsetVal.text = "${currentOffset.toInt()} px"
@@ -270,23 +206,17 @@ class MainActivity : AppCompatActivity() {
                 updatePreview()
             }
         }
-        btnResetDateOffset.setOnClickListener {
-            sliderDateOffset.value = 140f
-            settings.dateOffset = 140f
+        findViewById<TextView>(R.id.btnResetDateOffset).setOnClickListener {
+            sliderDateOffset.value = 140f; settings.dateOffset = 140f
             settings.dateXPercent = settings.timeXPercent
             settings.dateYPercent = (settings.timeYPercent - (140f / 1920f)).coerceIn(0.05f, 0.95f)
-            tvDateOffsetVal.text = "140 px"
-            updatePreview()
+            tvDateOffsetVal.text = "140 px"; updatePreview()
         }
 
         findViewById<ExtendedFloatingActionButton>(R.id.btnApplyWallpaper).setOnClickListener {
-            val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
-                putExtra(
-                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                    ComponentName(this@MainActivity, DepthWallpaperService::class.java)
-                )
-            }
-            startActivity(intent)
+            startActivity(Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+                putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, ComponentName(this@MainActivity, DepthWallpaperService::class.java))
+            })
         }
 
         loadBitmaps()
@@ -296,220 +226,122 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadBitmaps()
-        loadTypefaces()
+        loadBitmaps(); loadTypefaces()
         ivPreview.post { updatePreview() }
-    }
-
-    inner class TouchEditorView(context: Context) : View(context) {
-        private var activeTarget = 0
-        private var lastTouchX = 0f
-        private var lastTouchY = 0f
-
-        private val guidePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#80D0BCFF")
-            style = Paint.Style.STROKE
-            strokeWidth = 3f
-            pathEffect = DashPathEffect(floatArrayOf(14f, 10f), 0f)
-        }
-
-        override fun onDraw(canvas: Canvas) {
-            super.onDraw(canvas)
-            val w = width
-            val h = height
-            if (w <= 0 || h <= 0) return
-
-            val bg = previewBgBitmap
-            if (bg != null) {
-                drawCenterCrop(canvas, bg, w, h)
-            } else {
-                canvas.drawColor(Color.parseColor("#1B1F27"))
-            }
-
-            val scaleRatio = w / 1080f
-            val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = settings.timeColor
-                textSize = settings.timeSize * scaleRatio
-                typeface = previewClockTypeface
-                textAlign = Paint.Align.CENTER
-            }
-            val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#E0E0E0")
-                textSize = 50f * scaleRatio
-                typeface = previewDateTypeface
-                textAlign = Paint.Align.CENTER
-            }
-
-            val now = Date()
-            val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
-            val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
-
-            val clockX = w * settings.timeXPercent
-            val clockY = h * settings.timeYPercent
-            val dateX = w * settings.dateXPercent
-            val dateY = h * settings.dateYPercent
-
-            if (!settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
-            if (!settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
-
-            val fg = previewFgBitmap
-            if (fg != null) drawCenterCrop(canvas, fg, w, h)
-
-            if (settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
-            if (settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
-
-            val timeWidth = timePaint.measureText(timeStr)
-            val timeHeight = timePaint.textSize * 0.75f
-            canvas.drawRoundRect(
-                RectF(clockX - timeWidth / 2f - 20f, clockY - timeHeight - 16f, clockX + timeWidth / 2f + 20f, clockY + 20f),
-                16f, 16f, guidePaint
-            )
-
-            val dateWidth = datePaint.measureText(dateStr)
-            val dateHeight = datePaint.textSize * 0.85f
-            canvas.drawRoundRect(
-                RectF(dateX - dateWidth / 2f - 16f, dateY - dateHeight - 12f, dateX + dateWidth / 2f + 16f, dateY + 14f),
-                12f, 12f, guidePaint
-            )
-        }
-
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouchEvent(event: MotionEvent): Boolean {
-            val w = width.toFloat()
-            val h = height.toFloat()
-            if (w <= 0f || h <= 0f) return false
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    lastTouchX = event.x
-                    lastTouchY = event.y
-
-                    val clockX = w * settings.timeXPercent
-                    val clockY = h * settings.timeYPercent - 40f
-                    val dateX = w * settings.dateXPercent
-                    val dateY = h * settings.dateYPercent - 15f
-
-                    val distClock = hypot(event.x - clockX, event.y - clockY)
-                    val distDate = hypot(event.x - dateX, event.y - dateY)
-
-                    activeTarget = when {
-                        distDate < 150f && distDate < distClock -> 2
-                        distClock < 260f -> 1
-                        else -> 0
-                    }
-                    return true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val dx = (event.x - lastTouchX) / w
-                    val dy = (event.y - lastTouchY) / h
-                    lastTouchX = event.x
-                    lastTouchY = event.y
-
-                    if (activeTarget == 1) {
-                        settings.timeXPercent = (settings.timeXPercent + dx).coerceIn(0.05f, 0.95f)
-                        settings.timeYPercent = (settings.timeYPercent + dy).coerceIn(0.08f, 0.95f)
-                        invalidate()
-                    } else if (activeTarget == 2) {
-                        settings.dateXPercent = (settings.dateXPercent + dx).coerceIn(0.05f, 0.95f)
-                        settings.dateYPercent = (settings.dateYPercent + dy).coerceIn(0.05f, 0.95f)
-                        invalidate()
-                    }
-                    return true
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    activeTarget = 0
-                    return true
-                }
-            }
-            return super.onTouchEvent(event)
-        }
     }
 
     private fun openFullscreenTouchEditor() {
         val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val root = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#0E1116")) }
 
-        val root = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#0E1116"))
-        }
-
-        val interactiveView = TouchEditorView(this)
+        val editorView = TouchEditorView(this, settings, previewBgBitmap, previewFgBitmap, previewClockTypeface, previewDateTypeface)
 
         val hintBanner = TextView(this).apply {
             text = "Drag Clock or Date freely anywhere"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            setBackgroundColor(Color.parseColor("#990E1116"))
-            setPadding(36, 20, 36, 20)
-            gravity = Gravity.CENTER
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            ).apply { topMargin = 48 }
+            setTextColor(Color.WHITE); textSize = 14f
+            setBackgroundColor(Color.parseColor("#990E1116")); setPadding(36, 20, 36, 20)
+            layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply { topMargin = 48 }
         }
 
         val doneBtn = MaterialButton(this).apply {
             text = "Done Positioning"
-            setTextColor(Color.parseColor("#381E72"))
-            setBackgroundColor(Color.parseColor("#D0BCFF"))
-            cornerRadius = 56
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            ).apply { bottomMargin = 56 }
+            setTextColor(Color.parseColor("#381E72")); setBackgroundColor(Color.parseColor("#D0BCFF")); cornerRadius = 56
+            layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL).apply { bottomMargin = 56 }
             setOnClickListener {
-                val clampedPercent = (settings.timeYPercent * 100f).coerceIn(10f, 80f)
-                sliderTimeY.value = clampedPercent
-                tvTimeYVal.text = "${clampedPercent.toInt()}%"
-                updatePreview()
-                dialog.dismiss()
+                val clamped = (settings.timeYPercent * 100f).coerceIn(10f, 80f)
+                sliderTimeY.value = clamped; tvTimeYVal.text = "${clamped.toInt()}%"
+                updatePreview(); dialog.dismiss()
             }
         }
 
-        root.addView(interactiveView)
-        root.addView(hintBanner)
-        root.addView(doneBtn)
-
-        dialog.setContentView(root)
-        dialog.show()
+        root.addView(editorView); root.addView(hintBanner); root.addView(doneBtn)
+        dialog.setContentView(root); dialog.show()
     }
 
     private fun showCustomColorDialog(customChip: Chip) {
-        val currentColor = settings.timeColor
-        var r = Color.red(currentColor)
-        var g = Color.green(currentColor)
-        var b = Color.blue(currentColor)
-
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(56, 36, 56, 16)
-        }
-
+        val current = settings.timeColor
+        var r = Color.red(current); var g = Color.green(current); var b = Color.blue(current)
+        val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(56, 36, 56, 16) }
         val swatch = View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                110
-            ).apply { bottomMargin = 32 }
-            background = GradientDrawable().apply {
-                cornerRadius = 24f
-                setColor(currentColor)
-            }
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 110).apply { bottomMargin = 32 }
+            background = GradientDrawable().apply { cornerRadius = 24f; setColor(current) }
         }
         layout.addView(swatch)
 
-        fun updateSwatch() {
-            val newColor = Color.rgb(r, g, b)
-            (swatch.background as GradientDrawable).setColor(newColor)
-        }
-
-        fun addChannelSlider(label: String, initial: Int, onChange: (Int) -> Unit) {
-            val tv = TextView(this).apply {
-                text = "$label: $initial"
-                setTextColor(Color.parseColor("#E0E2EC"))
-                textSize = 13f
-            }
+        fun addSlider(label: String, initial: Int, onChange: (Int) -> Unit) {
+            val tv = TextView(this).apply { text = "$label: $initial"; setTextColor(Color.parseColor("#E0E2EC")); textSize = 13f }
             val sb = SeekBar(this).apply {
-                max = 255
-                progress = initial
-                
+                max = 255; progress = initial
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                        tv.text = "$label: $p"; onChange(p)
+                        (swatch.background as GradientDrawable).setColor(Color.rgb(r, g, b))
+                    }
+                    override fun onStartTrackingTouch(s: SeekBar?) {}
+                    override fun onStopTrackingTouch(s: SeekBar?) {}
+                })
+            }
+            layout.addView(tv); layout.addView(sb)
+        }
+        addSlider("Red", r) { r = it }; addSlider("Green", g) { g = it }; addSlider("Blue", b) { b = it }
+
+        MaterialAlertDialogBuilder(this).setTitle("Custom Clock Color").setView(layout)
+            .setPositiveButton("Apply") { _, _ -> settings.timeColor = Color.rgb(r, g, b); customChip.isChecked = true; updatePreview() }
+            .setNegativeButton("Cancel", null).show()
+    }
+
+    private fun loadBitmaps() {
+        settings.bgPath?.let { File(it).takeIf { f -> f.exists() }?.let { f -> previewBgBitmap = BitmapFactory.decodeFile(f.absolutePath) } }
+        settings.fgPath?.let { File(it).takeIf { f -> f.exists() }?.let { f -> previewFgBitmap = BitmapFactory.decodeFile(f.absolutePath) } }
+    }
+
+    private fun loadTypefaces() {
+        settings.fontPath?.let { File(it).takeIf { f -> f.exists() }?.let { f -> try { previewClockTypeface = Typeface.createFromFile(f) } catch (_: Exception) {} } }
+        settings.dateFontPath?.let { File(it).takeIf { f -> f.exists() }?.let { f -> try { previewDateTypeface = Typeface.createFromFile(f) } catch (_: Exception) {} } }
+    }
+
+    private fun updatePreview() {
+        val width = 360; val height = 640
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+
+        previewBgBitmap?.let { drawCenterCrop(canvas, it, width, height) } ?: canvas.drawColor(Color.parseColor("#1B1F27"))
+
+        val scaleRatio = width / 1080f
+        val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = settings.timeColor; textSize = settings.timeSize * scaleRatio; typeface = previewClockTypeface; textAlign = Paint.Align.CENTER }
+        val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#E0E0E0"); textSize = 50f * scaleRatio; typeface = previewDateTypeface; textAlign = Paint.Align.CENTER }
+
+        val now = Date()
+        val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+        val dateStr = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(now)
+
+        val clockX = width * settings.timeXPercent; val clockY = height * settings.timeYPercent
+        val dateX = width * settings.dateXPercent; val dateY = height * settings.dateYPercent
+
+        if (!settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
+        if (!settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
+        previewFgBitmap?.let { drawCenterCrop(canvas, it, width, height) }
+        if (settings.dateInFront) canvas.drawText(dateStr, dateX, dateY, datePaint)
+        if (settings.clockInFront) canvas.drawText(timeStr, clockX, clockY, timePaint)
+
+        ivPreview.setImageBitmap(bmp)
+    }
+
+    private fun drawCenterCrop(canvas: Canvas, bitmap: Bitmap, viewWidth: Int, viewHeight: Int) {
+        val bw = bitmap.width.toFloat(); val bh = bitmap.height.toFloat()
+        if (bw <= 0 || bh <= 0) return
+        val scale = max(viewWidth / bw, viewHeight / bh)
+        val matrix = Matrix().apply { postScale(scale, scale); postTranslate((viewWidth - scale * bw) / 2f, (viewHeight - scale * bh) / 2f) }
+        canvas.drawBitmap(bitmap, matrix, null)
+    }
+
+    private fun saveFileToInternal(uri: Uri, filename: String): String? {
+        return try {
+            val dest = File(filesDir, filename)
+            contentResolver.openInputStream(uri)?.use { input -> FileOutputStream(dest).use { output -> input.copyTo(output) } }
+            dest.absolutePath
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to load file", Toast.LENGTH_SHORT).show(); null
+        }
+    }
+}
