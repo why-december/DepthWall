@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -42,10 +43,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvBgStatus: TextView
     private lateinit var tvFgStatus: TextView
     private lateinit var tvFontStatus: TextView
+    private lateinit var tvDateFontStatus: TextView
 
     private var previewBgBitmap: Bitmap? = null
     private var previewFgBitmap: Bitmap? = null
-    private var previewTypeface: Typeface = Typeface.DEFAULT_BOLD
+    private var previewClockTypeface: Typeface = Typeface.DEFAULT_BOLD
+    private var previewDateTypeface: Typeface = Typeface.DEFAULT
 
     private val pickBgLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -75,9 +78,21 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             saveFileToInternal(it, "custom_font.ttf")?.let { path ->
                 settings.fontPath = path
-                tvFontStatus.text = "Custom font loaded ✓"
+                tvFontStatus.text = "Custom clock font ✓"
                 tvFontStatus.setTextColor(Color.parseColor("#80D49E"))
-                loadTypeface()
+                loadTypefaces()
+                updatePreview()
+            }
+        }
+    }
+
+    private val pickDateFontLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            saveFileToInternal(it, "custom_date_font.ttf")?.let { path ->
+                settings.dateFontPath = path
+                tvDateFontStatus.text = "Custom date font ✓"
+                tvDateFontStatus.setTextColor(Color.parseColor("#80D49E"))
+                loadTypefaces()
                 updatePreview()
             }
         }
@@ -93,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         tvBgStatus = findViewById(R.id.tvBgStatus)
         tvFgStatus = findViewById(R.id.tvFgStatus)
         tvFontStatus = findViewById(R.id.tvFontStatus)
+        tvDateFontStatus = findViewById(R.id.tvDateFontStatus)
 
         if (settings.bgPath != null) {
             tvBgStatus.text = "Background set ✓"
@@ -103,13 +119,35 @@ class MainActivity : AppCompatActivity() {
             tvFgStatus.setTextColor(Color.parseColor("#80D49E"))
         }
         if (settings.fontPath != null) {
-            tvFontStatus.text = "Custom font loaded ✓"
+            tvFontStatus.text = "Custom clock font ✓"
             tvFontStatus.setTextColor(Color.parseColor("#80D49E"))
+        }
+        if (settings.dateFontPath != null) {
+            tvDateFontStatus.text = "Custom date font ✓"
+            tvDateFontStatus.setTextColor(Color.parseColor("#80D49E"))
         }
 
         findViewById<MaterialCardView>(R.id.cardPickBg).setOnClickListener { pickBgLauncher.launch("image/*") }
         findViewById<MaterialCardView>(R.id.cardPickFg).setOnClickListener { pickFgLauncher.launch("image/png") }
         findViewById<MaterialCardView>(R.id.cardPickFont).setOnClickListener { pickFontLauncher.launch("*/*") }
+        findViewById<MaterialCardView>(R.id.cardPickDateFont).setOnClickListener { pickDateFontLauncher.launch("*/*") }
+
+        // Foreground Layer Checkboxes
+        val cbClockInFront = findViewById<MaterialCheckBox>(R.id.cbClockInFront)
+        val cbDateInFront = findViewById<MaterialCheckBox>(R.id.cbDateInFront)
+
+        cbClockInFront.isChecked = settings.clockInFront
+        cbDateInFront.isChecked = settings.dateInFront
+
+        cbClockInFront.setOnCheckedChangeListener { _, isChecked ->
+            settings.clockInFront = isChecked
+            updatePreview()
+        }
+
+        cbDateInFront.setOnCheckedChangeListener { _, isChecked ->
+            settings.dateInFront = isChecked
+            updatePreview()
+        }
 
         // Color Chips + Custom Color Picker
         val chipGroup = findViewById<ChipGroup>(R.id.chipGroupColors)
@@ -147,7 +185,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Allow re-tapping the Custom chip even when it's already selected
         chipCustom.setOnClickListener {
             chipCustom.isChecked = true
             showCustomColorDialog(chipCustom)
@@ -230,14 +267,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadBitmaps()
-        loadTypeface()
+        loadTypefaces()
         ivPreview.post { updatePreview() }
     }
 
     override fun onResume() {
         super.onResume()
         loadBitmaps()
-        loadTypeface()
+        loadTypefaces()
         ivPreview.post { updatePreview() }
     }
 
@@ -324,12 +361,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadTypeface() {
+    private fun loadTypefaces() {
         settings.fontPath?.let { path ->
             val file = File(path)
             if (file.exists()) {
                 try {
-                    previewTypeface = Typeface.createFromFile(file)
+                    previewClockTypeface = Typeface.createFromFile(file)
+                } catch (_: Exception) {}
+            }
+        }
+        settings.dateFontPath?.let { path ->
+            val file = File(path)
+            if (file.exists()) {
+                try {
+                    previewDateTypeface = Typeface.createFromFile(file)
                 } catch (_: Exception) {}
             }
         }
@@ -341,6 +386,7 @@ class MainActivity : AppCompatActivity() {
         val previewBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(previewBitmap)
 
+        // 1. Background Layer
         val bg = previewBgBitmap
         if (bg != null) {
             drawCenterCrop(canvas, bg, width, height)
@@ -352,13 +398,14 @@ class MainActivity : AppCompatActivity() {
         val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = settings.timeColor
             textSize = settings.timeSize * scaleRatio
-            typeface = previewTypeface
+            typeface = previewClockTypeface
             textAlign = Paint.Align.CENTER
         }
 
         val datePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#E0E0E0")
             textSize = 50f * scaleRatio
+            typeface = previewDateTypeface
             textAlign = Paint.Align.CENTER
         }
 
@@ -370,12 +417,26 @@ class MainActivity : AppCompatActivity() {
         val timeY = height * settings.timeYPercent
         val dateY = timeY - (settings.dateOffset * scaleRatio)
 
-        canvas.drawText(dateStr, centerX, dateY, datePaint)
-        canvas.drawText(timeStr, centerX, timeY, timePaint)
+        // 2. Draw text elements assigned BEHIND subject cutout
+        if (!settings.dateInFront) {
+            canvas.drawText(dateStr, centerX, dateY, datePaint)
+        }
+        if (!settings.clockInFront) {
+            canvas.drawText(timeStr, centerX, timeY, timePaint)
+        }
 
+        // 3. Foreground Cutout Layer
         val fg = previewFgBitmap
         if (fg != null) {
             drawCenterCrop(canvas, fg, width, height)
+        }
+
+        // 4. Draw text elements assigned IN FRONT OF subject cutout
+        if (settings.dateInFront) {
+            canvas.drawText(dateStr, centerX, dateY, datePaint)
+        }
+        if (settings.clockInFront) {
+            canvas.drawText(timeStr, centerX, timeY, timePaint)
         }
 
         ivPreview.setImageBitmap(previewBitmap)
